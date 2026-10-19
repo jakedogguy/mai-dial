@@ -22,7 +22,9 @@ LEADING_TS = re.compile(rf"^{TIMESTAMP}\s*[-–—|:]?\s*")
 TRAILING_TS = re.compile(rf"\s*[-–—|]?\s*{TIMESTAMP}$")
 NUMBERING = re.compile(r"^(?:#\d{1,3}|\d{1,3}\s*[.)]|\d{1,3}\s+[-–—]\s+(?=.+\s[-–—]\s))\s*")
 BULLET = re.compile(r"^[-–—•*·▶►→>~|]+\s*")
-SEPARATORS = re.compile(r"\s+[-–—|~]\s+|\s+by\s+|:\s+", re.IGNORECASE)
+# Lowercase "by" only: in Title Case lines "By" is usually part of the song title.
+SEPARATORS = re.compile(r"\s+[-–—|~]\s+|\s+by\s+|:\s+")
+MAX_WORDS = 8  # without a timestamp, longer halves are probably prose, not a song
 ALBUM_MARK = re.compile(r"\s*[\[(](?:album|full album|lp|ep)[\])]\s*|\s+\b(?:LP|EP)\b\s*$", re.IGNORECASE)
 VIDEO_NOISE = re.compile(
     r"\s*[\[(](?:official\s+)?(?:music\s+)?(?:video|audio|lyrics?(?:\s+video)?|visualizer|hd|hq|4k)[\])]",
@@ -31,7 +33,8 @@ VIDEO_NOISE = re.compile(
 NOISE_WORDS = re.compile(
     r"https?://|www\.|subscribe|follow|instagram|twitter|facebook|tiktok|soundcloud|spotify|"
     r"apple music|bandcamp|patreon|discord|merch|copyright|©|all rights|provided to youtube|"
-    r"auto-generated|listen on|stream (?:it|now)|download|contact|e-?mail|business",
+    r"auto-generated|listen on|stream (?:it|now)|download|contact|e-?mail|business|"
+    r"(?:^|\s)@\w|design|animation|artwork|thumbnail|edited by|mixed by",
     re.IGNORECASE,
 )
 HEADER = re.compile(r"^(?:full\s+)?(tracklist|track list|songs?|tracks|albums?|discography)\b.*:?$", re.IGNORECASE)
@@ -81,6 +84,8 @@ def parse_line(line: str, in_album_section: bool = False) -> TrackQuery | None:
         if match.group().strip().lower() == "by":
             # "Title by Artist" -> keep the conventional "Artist - Title" order.
             left, right = right, left
+        if not had_ts and max(len(left.split()), len(right.split())) > MAX_WORDS:
+            return None
         if left and right:
             return TrackQuery(raw=raw, left=left, right=right, kind=kind)
         text = left or right

@@ -36,6 +36,19 @@ def test_title_by_artist_is_flipped():
     assert parse_line("Clair de Lune by Claude Debussy").left == "Claude Debussy"
 
 
+def test_capitalized_by_stays_in_title():
+    item = parse_line("15:01 I Thought I'd Be Over This By Now")
+    assert (item.left, item.right) == ("I Thought I'd Be Over This By Now", "")
+
+
+def test_prose_and_credits_are_ignored():
+    desc = """This playlist is a long drive with no destination — just you, the road, and the thoughts.
+✒️ Logo design/animation: Jared Kohn @mountain_lines
+0:00 Cassia - ‘miles out’
+"""
+    assert pairs(desc) == [("Cassia", "miles out", "track")]
+
+
 def test_timestamp_without_artist():
     item = parse_line("12:30 Untitled Interlude")
     assert (item.left, item.right) == ("Untitled Interlude", "")
