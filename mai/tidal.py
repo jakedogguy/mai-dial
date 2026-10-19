@@ -100,3 +100,21 @@ def find_match(session: tidalapi.Session, query: TrackQuery) -> Match:
         return Match(query, None, 0.0)
     best = max(candidates, key=lambda item: score(query, item))
     return Match(query, best, score(query, best))
+
+
+def track_ids(matches: list[Match]) -> list[str]:
+    """Flatten matches into track ids; albums contribute all their tracks."""
+    ids: list[str] = []
+    for m in matches:
+        if isinstance(m.item, tidalapi.Album):
+            ids.extend(str(t.id) for t in m.item.tracks())
+        elif m.item is not None:
+            ids.append(str(m.item.id))
+    return list(dict.fromkeys(ids))
+
+
+def create_playlist(session: tidalapi.Session, title: str, description: str, ids: list[str]):
+    playlist = session.user.create_playlist(title, description)
+    for i in range(0, len(ids), 100):  # Tidal accepts up to 100 items per request
+        playlist.add(ids[i : i + 100])
+    return playlist
