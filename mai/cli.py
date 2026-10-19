@@ -1,5 +1,6 @@
 import argparse
 import sys
+import webbrowser
 
 from rich.console import Console
 from rich.markup import escape
@@ -117,7 +118,11 @@ def run(url: str | None) -> int:
 
     console.print(f"\n[green]✓ Playlist created[/] with {len(ids)} tracks: [cyan underline]{playlist.share_url}[/]")
     if cover:
+        # Tidal's API can't set playlist images yet, so the cover is applied by hand.
         console.print(f"[dim]Cover saved to[/] {escape(str(cover.resolve()))}")
+        if Confirm.ask("Open the playlist and the cover to set it in Tidal?", default=True):
+            webbrowser.open(playlist.share_url)
+            webbrowser.open(cover.resolve().parent.as_uri())
     skipped = len(matches) - len(chosen) - len(missing)
     if skipped:
         console.print(f"[yellow]{skipped} discarded[/]")

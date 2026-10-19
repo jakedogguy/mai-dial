@@ -24,7 +24,12 @@ Or just run `mai` and paste the link when asked.
 The first run asks you to log in to Tidal: open the link shown, enter the code,
 and Mai saves the session in `~/.mai/tidal_session.json` so you won't be asked again.
 
-The video thumbnail is saved to `covers/`.
+The video thumbnail is saved to `covers/`. Tidal's API doesn't allow setting a
+playlist image yet, so Mai opens the playlist and the cover folder for you to set it
+by hand in the Tidal app.
+
+Matches under 80% similarity are shown in yellow and you decide whether to keep them;
+songs not found on Tidal are listed at the end.
 
 ---
 
