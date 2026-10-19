@@ -8,6 +8,10 @@ dist/
 .pytest_cache/
 .claude/settings.local.json
 
-# Mai output and secrets
+# Mai output and secrets (the Tidal session normally lives in ~/.mai/, outside the repo)
 covers/
+.mai/
 tidal_session.json
+*session*.json
+.env
+.env.*
